@@ -4,7 +4,7 @@ const successResponse = (data, res) =>
     success: true
   })
 const errorResponse = (data, res) => {
-  const statusCode = data.statusCode || 500
+  const { statusCode = 500 } = data
   return res.status(statusCode).json({
     ...data,
     success: false
