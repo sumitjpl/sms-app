@@ -12,7 +12,7 @@ const authenticateUser = async (req, res, next) => {
         })
 
         if (!user) {
-            errorResponse({
+            return errorResponse({
                 statusCode: 400,
                 message: `Invalid request`
             }, res)
@@ -20,21 +20,21 @@ const authenticateUser = async (req, res, next) => {
         
         const validPassword =  await bcrypt.compare(req.body.password, user.password)
         if (!validPassword) {
-            errorResponse({
+            return errorResponse({
                 statusCode: 401,
                 message: `Unauthorized access`
             }, res)
         }
         
         const jwtToken = await generateToken(user)
-        successResponse({
+        return successResponse({
             data: {
                 emailId,
                 jwtToken
             }
         }, res)
     } catch (err) {
-        errorResponse({
+        return errorResponse({
             message: err.message
         }, res)
     }
