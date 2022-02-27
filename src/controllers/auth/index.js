@@ -1,38 +1,37 @@
 const { successResponse, errorResponse } = require('../../utils/apiResponse')
-const  { generateToken } = require('../../middleware/authApi')
-const { getUserService } = require('../user/service')
-const bcrypt = require('bcrypt')
-const { deleteAndInsertTokenService } = require('../../utils/token')
+const { authenticateUserService, forgotPasswordService, resetPasswordService } = require('./service')
+
+const registerUser = async (req, res) => {}
 
 const authenticateUser = async (req, res) => {
     try {
-        const { body: { emailId } } = req
-        const [ user ] = await getUserService({
-            emailId,
-            selectCred: true
-        })
-
-        if (!user) {
-            return errorResponse({
-                statusCode: 400,
-                message: `Invalid request`
-            }, res)
-        }
-        
-        const validPassword =  await bcrypt.compare(req.body.password, user.password)
-        if (!validPassword) {
-            return errorResponse({
-                statusCode: 401,
-                message: `Unauthorized access`
-            }, res)
-        }
-        
-        const jwtToken = await generateToken(user)
-        await deleteAndInsertTokenService({userId: user.id, token: jwtToken})
+        const jwtToken = await authenticateUserService(req)
         return successResponse({
             data: {
-                emailId,
+                emailId: req.body.emailId,
                 jwtToken
+            }
+        }, res)
+    } catch (err) {
+        return errorResponse({
+            message: err.message,
+            statusCode: err.statusCode
+        }, res)
+    }
+}
+
+const forgotPassword = (req, res) => {
+    try {
+        const { foundUser } = req
+        setTimeout(() => {
+            forgotPasswordService({
+                user: foundUser
+            })
+        }, 0)
+
+        return successResponse({
+            data: {
+                message: `Otp sent!`
             }
         }, res)
     } catch (err) {
@@ -42,18 +41,25 @@ const authenticateUser = async (req, res) => {
     }
 }
 
-const forgotPassword = async (req, res) => {
-    try {
-        const { foundUser } = req
-    } catch (err) {
-        return errorResponse({
-            message: err.message
-        }, res)
-    }
-}
-
 const resetPassword = async (req, res) => {
-
+    try {
+        const { body: {
+            emailId,
+            password,
+            otp
+            },
+            foundUser
+        } = req
+        const result = await resetPasswordService({
+                        channel: emailId,
+                        otp,
+                        password,
+                        foundUser
+                    })
+        return successResponse({ result }, res)
+    } catch (err) {
+        return errorResponse({ message: err.message }, res)
+    }
 }
 
 module.exports = {

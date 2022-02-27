@@ -4,7 +4,7 @@ const { setCustomerObject,
     sanitizeCustomerData
 } = require('./service')
 
-const addCustomer = async(req, res, next) => {
+const addCustomer = async(req, res) => {
     try {
         const { data } = req.body
         if (!Array.isArray(data) || !data.length) {

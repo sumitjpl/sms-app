@@ -1,5 +1,5 @@
 const moment = require('moment')
-const { getLoggedInTokenModel, delSertModel } = require('../model/userToken')
+const { getLoggedInTokenModel, delSertTokenModel } = require('../model/userToken')
 
 const deleteAndInsertTokenService = async ({
     userId,
@@ -10,7 +10,7 @@ const deleteAndInsertTokenService = async ({
             throw new Error('Token and user id missing!')
         }
 
-        const dbResult = await delSertModel({
+        const dbResult = await delSertTokenModel({
                         userId,
                         token,
                         createdAt: moment().format('YYYY-MM-DD HH:mm:ss')

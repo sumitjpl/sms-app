@@ -8,5 +8,6 @@ module.exports = {
     tableSmsTemplate: 'sms_templates',
     tableSentSmsContent: 'sent_sms_contents',
     tableSentSmsRecord: 'sent_sms_record',
-    tableUserToken: 'user_tokens'
+    tableUserToken: 'user_tokens',
+    tableAuthOtp: 'auth_otp'
 }

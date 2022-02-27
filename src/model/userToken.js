@@ -18,7 +18,7 @@ const getLoggedInTokenModel = async ({
     return sql
 }
 
-const delSertModel = async ({
+const delSertTokenModel = async ({
     userId,
     token,
     createdAt
@@ -39,11 +39,11 @@ const delSertModel = async ({
                 .then(trx.commit)
                 .catch(trx.rollback)
     })
-    .then(resp => true)
+    .then(resp => resp)
     .catch(err =>  { throw err })
 }
 
 module.exports = {
     getLoggedInTokenModel,
-    delSertModel
+    delSertTokenModel
 }

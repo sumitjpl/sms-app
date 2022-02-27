@@ -5,5 +5,7 @@
     "SMS_API_END_POINTS" : {
         "PUSH_SMS": "/api/push"
     },
-    "SMS_DELIVERY_URL" : "https://daakia.co.in/api/sms/callback"
+    "SMS_DELIVERY_URL" : "https://daakia.co.in/api/sms/callback",
+    "OTP_MAX_EXPIRY_DIGIT": 10,
+    "OTP_EXPIRY_TYPE" : "minutes"
 }

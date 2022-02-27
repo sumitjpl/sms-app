@@ -48,7 +48,12 @@ const isValidMobileNo = (mobileNo) => {
     return response
 }
 
+const generateOtp = () => {
+    return Math.floor(100000 + Math.random() * 900000)
+}
+
 module.exports = {
     generatePassword,
-    isValidMobileNo
+    isValidMobileNo,
+    generateOtp
 }
