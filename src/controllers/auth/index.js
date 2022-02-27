@@ -2,8 +2,9 @@ const { successResponse, errorResponse } = require('../../utils/apiResponse')
 const  { generateToken } = require('../../middleware/authApi')
 const { getUserService } = require('../user/service')
 const bcrypt = require('bcrypt')
+const { deleteAndInsertTokenService } = require('../../utils/token')
 
-const authenticateUser = async (req, res, next) => {
+const authenticateUser = async (req, res) => {
     try {
         const { body: { emailId } } = req
         const [ user ] = await getUserService({
@@ -27,6 +28,7 @@ const authenticateUser = async (req, res, next) => {
         }
         
         const jwtToken = await generateToken(user)
+        await deleteAndInsertTokenService({userId: user.id, token: jwtToken})
         return successResponse({
             data: {
                 emailId,
@@ -40,6 +42,22 @@ const authenticateUser = async (req, res, next) => {
     }
 }
 
+const forgotPassword = async (req, res) => {
+    try {
+        const { foundUser } = req
+    } catch (err) {
+        return errorResponse({
+            message: err.message
+        }, res)
+    }
+}
+
+const resetPassword = async (req, res) => {
+
+}
+
 module.exports = {
-    authenticateUser
+    authenticateUser,
+    forgotPassword,
+    resetPassword
 }

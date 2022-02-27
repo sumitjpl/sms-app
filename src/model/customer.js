@@ -7,24 +7,24 @@ const findOrCreateCustomerModel = async (options = {}) => {
     if (!mobile_no || !created_user_id ) {
         return false
     }
-    try {
-        return knex.transaction(trx => {
-            return trx(tableClientCustomer).where(`mobile_no`, mobile_no).where(`created_user_id`, created_user_id)
-            .then(res => {
-                if (!res.length) {
-                    return trx(tableClientCustomer).insert(options)
-                            .then(() => {
-                                return trx(tableClientCustomer).where(`mobile_no`, mobile_no).where(`created_user_id`, created_user_id)
-                            })
-                } else {
-                    return res
-                }
-            })
+    
+    return knex.transaction(trx => {
+        return trx(tableClientCustomer).where(`mobile_no`, mobile_no).where(`created_user_id`, created_user_id)
+        .then(res => {
+            if (!res.length) {
+                return trx(tableClientCustomer).insert(options)
+                        .then(() => {
+                            return trx(tableClientCustomer).where(`mobile_no`, mobile_no).where(`created_user_id`, created_user_id)
+                        })
+            } else {
+                return res
+            }
         })
-        .then(res => res)
-    } catch (err) {
-        throw err
-    }
+        .then(trx.commit)
+        .catch(trx.rollback)
+    })
+    .then(resp => resp)
+    .catch(err =>  { throw err })
 }
 
 module.exports = {

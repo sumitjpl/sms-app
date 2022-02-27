@@ -1,4 +1,5 @@
 const Validator = require('validatorjs')
+
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]$/
 const indianMobileRegex = /^[1-9][0-9]{9,12}$/
 const nameRegex = /^[a-zA-Z ]{1,100}$/ 
@@ -16,4 +17,5 @@ const validator = (body, rules, customMessage, callback) => {
     validation.fails(() => callback(validation.errors, false))
 }
 
-module.exports = validator
+
+module.exports =  { validator }

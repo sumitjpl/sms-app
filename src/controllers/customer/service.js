@@ -1,6 +1,6 @@
 const moment = require('moment')
 const { findOrCreateCustomerModel } = require('../../model/customer')
-const validate = require('../../helpers/validate')
+const  { validator } = require('../../helpers/validate')
 
 const sanitizeCustomerData = (dataList = []) => {
     const validateRules = {
@@ -11,7 +11,7 @@ const sanitizeCustomerData = (dataList = []) => {
     try {
         let errList = []
         dataList.map((data, index) => {
-            validate(data, validateRules, {}, (err, status) => {
+            validator(data, validateRules, {}, (err, status) => {
                 if (!status) {
                     let { errors: { mobileNumber, customerName } } = err
                     if (mobileNumber) {

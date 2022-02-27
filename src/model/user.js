@@ -3,7 +3,7 @@ const { tableUser, tableUserCred } = require('./smsTable')
 
 const getUserModel = async (options = {}) => {
     try {
-        const { emailId = '', selectCred = false } = options
+        const { emailId = '', selectCred = false, status = [] } = options
         const sql = knex(`${tableUser} as u`).select(['u.*'])
 
         if (selectCred) {
@@ -11,8 +11,12 @@ const getUserModel = async (options = {}) => {
             sql.join(`${tableUserCred} as uc`, 'uc.user_id', 'u.id')
         }
 
-        if (emailId !== undefined) {
+        if (emailId) {
             sql.where(`u.email_id`, emailId)
+        }
+
+        if (status.length) {
+            sql.whereIn(`u.status`, status)
         }
 
         return sql
