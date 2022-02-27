@@ -1,5 +1,5 @@
 const knex = require('../database/smsApp')
-const { tableUser, tableUserCred } = require('./smsTable')
+const { tableUser, tableUserProfile, tableUserCred } = require('./smsTable')
 
 const getUserModel = async (options = {}) => {
     try {
@@ -37,9 +37,7 @@ const getUserModel = async (options = {}) => {
 const insertUserCredModel = async insertObj => {
     const { 
         user_id,
-        password,
-        created_by,
-        plain_password
+        password
     } = insertObj
 
     if (!user_id) {
@@ -48,7 +46,6 @@ const insertUserCredModel = async insertObj => {
     if (!password) {
         throw new Error('password required!')
     }
-
 
     return knex.transaction(trx => {
         return trx(tableUserCred).where('user_id', user_id).update({ is_latest: 0 })
@@ -62,7 +59,74 @@ const insertUserCredModel = async insertObj => {
     .catch(err => { throw err })
 }
 
+const createUserObjModel = async options => {
+    const {
+        user_unique_id,
+        first_name,
+        middle_name,
+        last_name,
+        emailId: email_id,
+        mobile_no,
+        created_at,
+        created_by,
+        user_name,
+        status,
+        company_name,
+        address,
+        password,
+        is_latest,
+        hash_password
+    } = options
+    return knex.transaction(trx => {
+        return trx(tableUser).where('email_id', email_id)
+                .then(result => {
+                    if (result.length) {
+                        throw new Error('Email id already exists!')
+                    }
+                    return trx(tableUser).insert({
+                                user_unique_id,
+                                first_name,
+                                middle_name,
+                                last_name,
+                                email_id,
+                                mobile_no,
+                                created_at,
+                                created_by,
+                                user_name,
+                                status
+                            })
+                            .then(user => {
+                                const [ insertedId ] = user
+                                if (insertedId) {
+                                    return trx(tableUserProfile).insert({
+                                            user_id: insertedId,
+                                            company_name,
+                                            address
+                                        })
+                                        .then(() => {
+                                            return trx(tableUserCred).insert({
+                                                    user_id: insertedId,
+                                                    password: hash_password,
+                                                    plain_password: password,
+                                                    is_latest,
+                                                    created_at
+                                                })
+                                                .then(() => {
+                                                    return trx(tableUser).where('id', insertedId)
+                                                })
+                                    })
+                                }
+                            })
+                })
+                .then(trx.commit)
+                .catch(trx.rollback)
+    })
+    .then(resp => resp)
+    .catch(err => { throw err })
+}
+
 module.exports = {
+    createUserObjModel,
     getUserModel,
     insertUserCredModel
 }

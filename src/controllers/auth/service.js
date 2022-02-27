@@ -4,10 +4,25 @@ const moment = require('moment')
 const { getUserService } = require('../user/service')
 const { generateSaveOtp, getAndDeleteOtp } = require("../../helpers/otp")
 const { generateToken } = require('../../middleware/authApi')
-const { insertUserCredModel } = require('../../model/user')
+const { insertUserCredModel, createUserObjModel } = require('../../model/user')
 const { sendEmailService } = require("../../services/emailService")
 const { generateOtp } = require("../../utils/commonFunction")
 const { deleteAndInsertTokenService } = require('../../utils/token')
+
+const registerUserService = async options => {
+    try {
+        options = { 
+            ...options,
+            created_at: moment().format('YYYY-MM-DD HH:mm:ss'),
+            is_latest: true,
+            hash_password: await hashPasswordAsync(options.password)
+        }
+        const dbResult = await createUserObjModel(options)
+        return dbResult   
+    } catch (err) {
+        throw err
+    }
+}
 
 const authenticateUserService = async options => {
     try {
@@ -87,7 +102,7 @@ const resetPasswordService = async({
             user_id: foundUser.id,
             plain_password: password,
             password: hash,
-            created_by: moment().format('YYYY-MM-DD HH:mm:ss')
+            created_at: moment().format('YYYY-MM-DD HH:mm:ss')
         })
         return dbResult
     } catch (err) {
@@ -103,6 +118,7 @@ const hashPasswordAsync = async password => {
 }
 
 module.exports = {
+    registerUserService,
     authenticateUserService,
     forgotPasswordService,
     resetPasswordService,

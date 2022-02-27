@@ -1,6 +1,6 @@
 const Validator = require('validatorjs')
 
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]$/
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/
 const indianMobileRegex = /^[1-9][0-9]{9,12}$/
 const nameRegex = /^[a-zA-Z ]{1,100}$/ 
 Validator.register('strict', value => passwordRegex.test(value),
@@ -8,7 +8,7 @@ Validator.register('strict', value => passwordRegex.test(value),
 Validator.register('indian_mobile', value => indianMobileRegex.test(value),
     'Invalid mobile number')
 Validator.register('name', value => nameRegex.test(value),
-    'Invalid mobile number')
+    'Invalid name')
 
 const validator = (body, rules, customMessage, callback) => {
     const validation = new Validator(body, rules, customMessage)

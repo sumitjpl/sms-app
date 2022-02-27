@@ -2,7 +2,49 @@ const  { validator } = require('../../helpers/validate')
 const { errorResponse } = require('../../utils/apiResponse')
 const { getUserService } = require('../../controllers/user/service')
 
-const validate = (req, res, next) => {
+const validateRegisterUser = (req, res, next) => {
+    const validateRules = {
+        "emailId": "required|email",
+        "first_name": "required|alpha",
+        "middle_name": "alpha",
+        "last_name": "alpha",
+        "mobile_no": "required|indian_mobile",
+        "password": "required|min:6|strict",
+        "password_confirmation": "required|same:password",
+        "company_name": "present",
+        "address": "required"
+    }
+
+    validator(req.body, validateRules, {}, async (err, status) => {
+        if (!status) {
+            return errorResponse({
+                statusCode: 412,
+                errors: err.errors,
+                message: `Validation failed`
+            }, res)
+        } else {
+            const [ user ] = await getUserService({
+                emailId: req.body.emailId,
+                status: ['Active']
+            })
+            
+            if (user) {
+                return errorResponse({
+                    statusCode: 412,
+                    errors: {
+                        emailId: [
+                            `The email id already exists.`
+                        ]
+                    },
+                    message: `Validation failed`
+                }, res)
+            }
+            next()
+        }
+    })  
+}
+
+const validateAuthUser = (req, res, next) => {
     try {
         const validateRules = {
             "emailId": "required|email",
@@ -28,7 +70,7 @@ const validate = (req, res, next) => {
     }
 }
 
-const validateUser = async (req, res, next) => {
+const validateForgotPassword = async (req, res, next) => {
     try {
         const validateRules = {
             "emailId": "required|email",
@@ -112,7 +154,8 @@ const validateResetPassword = (req, res, next) => {
 }
 
 module.exports =  { 
-    validate,
-    validateUser,
+    validateRegisterUser,
+    validateAuthUser,
+    validateForgotPassword,
     validateResetPassword
 }

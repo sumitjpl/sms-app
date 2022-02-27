@@ -1,7 +1,19 @@
 const { successResponse, errorResponse } = require('../../utils/apiResponse')
-const { authenticateUserService, forgotPasswordService, resetPasswordService } = require('./service')
+const { 
+    registerUserService,
+    authenticateUserService, 
+    forgotPasswordService, 
+    resetPasswordService 
+} = require('./service')
 
-const registerUser = async (req, res) => {}
+const registerUser = async (req, res) => {
+    try {
+        const dbResult = await registerUserService(req.body)
+        return successResponse({ message: `User created successfully!`, user: dbResult }, res)
+    } catch (err) {
+        return errorResponse({message: err.message}, res)
+    }
+}
 
 const authenticateUser = async (req, res) => {
     try {
@@ -56,13 +68,14 @@ const resetPassword = async (req, res) => {
                         password,
                         foundUser
                     })
-        return successResponse({ result }, res)
+        return successResponse({ message: `Password reset successfully!` }, res)
     } catch (err) {
         return errorResponse({ message: err.message }, res)
     }
 }
 
 module.exports = {
+    registerUser,
     authenticateUser,
     forgotPassword,
     resetPassword
