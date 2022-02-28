@@ -21,14 +21,14 @@ const isValidMobileNo = (mobileNo) => {
     const startWithNumbers = ['9','8','7','6']
     if (mobileNoLength === 12) {
         firstTwoDigits = `${mobileNo[0]}${mobileNo[1]}`
-        thirdDigit = `${mobileNo[2]}}`
+        thirdDigit = `${mobileNo[2]}`
         if (firstTwoDigits !== '91') {
             response.isValid = false
             response.message = `If mobile number is 12 digit then it should start with 91`
 
             return response
         }
-
+        
         if (!startWithNumbers.includes(thirdDigit)) {
             response.isValid = false
             response.message = `If mobile number is 12 digit then its third digit should start with 9,8,7,6`

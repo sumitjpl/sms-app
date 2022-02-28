@@ -34,18 +34,18 @@ const sendSmsService = async (options = {}) => {
         let url = `${appConfig.SMS_API_BASE_URL}${appConfig.SMS_API_END_POINTS.PUSH_SMS}`
         let params = `?accesskey=${process.env.SMS_ACCESS_KEY}&to=${recipients}&text=${smsText}&from=${sender_id}&tid=${operator_template_id}&dlrurl=${appConfig.SMS_DELIVERY_URL}`
         
+        
         const { status, data } = await axios.get(`${url}${params}`, {validateStatus: () => true})
         
         if (status === 200 && data.status === 'success') {
-            const { message } = data
             const res = await createSentSmsTrack({
-                message,
+                message: data.message,
                 smsText,
                 loggedInUserId
             })
         }
-
-        return { status, message: OPERATOR_STATUS_CODE[status] }
+        
+        return { status, message: data.message,  statusMessage: OPERATOR_STATUS_CODE[status] }
     } catch (err) {
         throw err
     }
@@ -85,7 +85,7 @@ const setSentSmsObj = (message = [], loggedInUserId, smsContentId) => {
     message.forEach(el => {
         let key = [Object.keys(el)]
         result.push({
-            unique_id: `SMS/${loggedInUserId}/${timestamp}`,
+            unique_id: `${timestamp}${el[key]}`,
             user_id: loggedInUserId,
             recipient_no: key,
             sms_content_id: smsContentId,
