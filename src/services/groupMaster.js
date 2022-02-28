@@ -1,4 +1,5 @@
 const moment = require('moment')
+const groupNameRegex = /^[a-zA-Z-_0-9 ]{1,240}$/ 
 const { 
     getGroupMasterModel,
     addGroupModel,
@@ -16,20 +17,22 @@ const groupListService = async (options) => {
 
 const addGroupService = async (options) => {
     try {
-        
         const { userId, groupName } = options
-       
         if (!userId) {
             throw new Error('user id required')
         }
-
         if (!groupName) {
             throw new Error('group name required')
         }
+        
+        if (!groupNameRegex.test(groupName)) {
+            throw new Error('Invalid group name. Special chars are not allowed except (_- ).')
+        }
+      
         const dbResult = await addGroupModel({...setInsertGroupObject({
-            userId,
-            groupName
-        })})
+                            userId,
+                            groupName
+                        })})
         return dbResult
     } catch (err) {
         throw err
@@ -45,6 +48,10 @@ const modifyGroupService = async (options) => {
 
         if (!deleted && !groupName) {
             throw new Error('group name required')
+        }
+
+        if (!groupNameRegex.test(groupName)) {
+            throw new Error('group name must be an alpha_dash')
         }
 
         const dbResult = await updateGroupModel({...setUpdateGroupObject({
