@@ -3,8 +3,20 @@ const {
     registerUserService,
     authenticateUserService, 
     forgotPasswordService, 
-    resetPasswordService 
+    resetPasswordService,
+    sendOtpRegisterUserService
 } = require('./service')
+
+const sendOtpForRegisterUser = async (req, res) => {
+    try {
+        await sendOtpRegisterUserService({
+            emailId: req.body.emailId
+        })
+        return successResponse({ message: `Otp sent successfully!` }, res)
+    } catch (err) {
+        return errorResponse({message: err.message}, res)
+    }
+}
 
 const registerUser = async (req, res) => {
     try {
@@ -76,6 +88,7 @@ const resetPassword = async (req, res) => {
 
 module.exports = {
     registerUser,
+    sendOtpForRegisterUser,
     authenticateUser,
     forgotPassword,
     resetPassword

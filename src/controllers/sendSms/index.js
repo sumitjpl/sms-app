@@ -28,6 +28,11 @@ const sendSMSController = async (req, res) => {
     }
 }
 
+const smsDeliveryCallBackController = async (req, res) => {
+    
+}
+
 module.exports = {
-    sendSMSController
+    sendSMSController,
+    smsDeliveryCallBackController
 }

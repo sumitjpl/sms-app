@@ -20,17 +20,6 @@ const sendEmailService = async options => {
           htmlMessage: message,
           plainMessage: altText
         } = options
-        
-        // if (process.env.NODE_ENV !== 'production') {
-        //   message = `${message} <br> TO: ${JSON.stringify(
-        //     toEmail
-        //   )} FROM: ${fromEmail} CC: ${JSON.stringify(cc)} BCC: ${
-        //     bcc ? JSON.stringify(bcc) : ''
-        //   }`
-        //   toEmail = process.env.TEST_EMAIL
-        //   cc = process.env.CC_TEST_EMAIL
-        //   bcc = ''
-        // }
     
         if (!subject) {
           throw new Error('Subject is required to send the email')

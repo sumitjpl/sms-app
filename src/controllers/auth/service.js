@@ -2,23 +2,51 @@ const bcrypt = require('bcrypt')
 const moment = require('moment') 
 
 const { getUserService } = require('../user/service')
-const { generateSaveOtp, getAndDeleteOtp } = require("../../helpers/otp")
+const { getAndDeleteOtp } = require("../../helpers/otp")
 const { generateToken } = require('../../middleware/authApi')
 const { insertUserCredModel, createUserObjModel } = require('../../model/user')
-const { sendEmailService } = require("../../services/emailService")
-const { generateOtp } = require("../../utils/commonFunction")
 const { deleteAndInsertTokenService } = require('../../utils/token')
+const { sendOtpService } = require('../../services/sendOtp')
 
 const registerUserService = async options => {
     try {
+        const { emailId: channel, otp } =  options
+        const isOtpValid = await getAndDeleteOtp({
+            channel,
+            otp
+        })
+
+        if (!isOtpValid) {
+            throw new Error(`Invalid otp!`)
+        }
+
         options = { 
             ...options,
             created_at: moment().format('YYYY-MM-DD HH:mm:ss'),
             is_latest: true,
             hash_password: await hashPasswordAsync(options.password)
         }
+        
         const dbResult = await createUserObjModel(options)
         return dbResult   
+    } catch (err) {
+        throw err
+    }
+}
+
+const sendOtpRegisterUserService = async ({
+    emailId
+}) => {
+    try {
+        if (!emailId) {
+            throw new Error('Email Id is required!')
+        }
+        const response = await sendOtpService({
+                            channel: emailId,
+                            otpForService: `Register User`,
+                            sendOn: ['Email']
+                        })
+        return response
     } catch (err) {
         throw err
     }
@@ -65,19 +93,12 @@ const forgotPasswordService = async ({
 }) => {
     try {
         const { email_id } = user
-        const otp = generateOtp()
-        const dbResult = await generateSaveOtp({
-            otp,
-            channel: email_id
-        })
-
-        await sendEmailService({
-            fromEmail: process.env.FROM_EMAIL_ID,
-            toEmail: email_id,
-            subject: `One Time Password (OTP) for Forgot Password recovery on ${process.env.WEB_APP_NAME}`,
-            plainMessage: `Your One Time Password (OTP) for Forgot Password recovery on ${process.env.WEB_APP_NAME} is ${otp}.`
-        })
-        return dbResult
+        const response = await sendOtpService({
+                            channel: email_id,
+                            otpForService: `Forgot Password recovery`,
+                            sendOn: ['Email']
+                        })
+        return response
     } catch (err) {
         throw err
     }
@@ -119,6 +140,7 @@ const hashPasswordAsync = async password => {
 
 module.exports = {
     registerUserService,
+    sendOtpRegisterUserService,
     authenticateUserService,
     forgotPasswordService,
     resetPasswordService,

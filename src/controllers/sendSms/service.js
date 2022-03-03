@@ -17,28 +17,26 @@ const sendSmsService = async (options = {}) => {
         const smsTemplate = await getSmsTemplateModel({
                                 operatorTemplateId: templateId
                             })
-
         if (!smsTemplate.length) {
             throw Error('Invalid template!')
         }
 
         const [{ template_body, sender_id, operator_template_id }] = smsTemplate
-
         let smsText = String(template_body)
                         .replace('{#var_1#}', 'Test')
                         .replace('{#var_2#}', 'Test')
                         .replace('{#var_3#}', 'Test')
                         .replace('{#var_4#}', 'Test')
 
-        let recipients = mobileNo.length > 1 ? encodeURI(mobileNo.join(" ")) : mobileNo[0]
-        let url = `${appConfig.SMS_API_BASE_URL}${appConfig.SMS_API_END_POINTS.PUSH_SMS}`
-        let params = `?accesskey=${process.env.SMS_ACCESS_KEY}&to=${recipients}&text=${smsText}&from=${sender_id}&tid=${operator_template_id}&dlrurl=${appConfig.SMS_DELIVERY_URL}`
-        
-        
-        const { status, data } = await axios.get(`${url}${params}`, {validateStatus: () => true})
-        
+        const { status, data } = await sendSmsToEndPoint({
+            mobileNo,
+            operatorTemplateId: operator_template_id,
+            senderId: sender_id,
+            smsText
+        })
+
         if (status === 200 && data.status === 'success') {
-            const res = await createSentSmsTrack({
+            await createSentSmsTrack({
                 message: data.message,
                 smsText,
                 loggedInUserId
@@ -49,6 +47,21 @@ const sendSmsService = async (options = {}) => {
     } catch (err) {
         throw err
     }
+}
+
+const sendSmsToEndPoint = async ({
+    mobileNo,
+    operatorTemplateId,
+    senderId,
+    smsText
+}) => {
+    const recipients = mobileNo.length > 1 ? encodeURI(mobileNo.join(" ")) : mobileNo[0]
+    const endPoint = `${appConfig.SMS_API_BASE_URL}${appConfig.SMS_API_END_POINTS.PUSH_SMS}`
+    const deliverUrl = encodeURI(`${process.env.BASE_URL}${appConfig.SMS_DELIVERY_URL}?status=%d&mobileNo=%p&message=%t&timestamp=%a`)
+    const params = `?accesskey=${process.env.SMS_ACCESS_KEY}&to=${recipients}&text=${smsText}&from=${senderId}&tid=${operatorTemplateId}&dlrurl=${deliverUrl}`
+    const response = await axios.get(`${endPoint}${params}`, {validateStatus: () => true})
+    
+    return response
 }
 
 const createSentSmsTrack = async (options) => {
@@ -114,5 +127,6 @@ const validateMobileNo = (mobileNoList = []) => {
 module.exports = {
     sendSmsService,
     createSentSmsTrack,
-    validateMobileNo
+    validateMobileNo,
+    sendSmsToEndPoint
 }

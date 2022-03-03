@@ -12,7 +12,8 @@ const validateRegisterUser = (req, res, next) => {
         "password": "required|min:6|strict",
         "password_confirmation": "required|same:password",
         "company_name": "present",
-        "address": "required"
+        "address": "required",
+        "otp": "required|digits:6"
     }
 
     validator(req.body, validateRules, {}, async (err, status) => {
@@ -153,9 +154,46 @@ const validateResetPassword = (req, res, next) => {
     }) 
 }
 
+const validateSendOtpUser = (req, res, next) => {
+    const validateRules = {
+        "emailId": "required|email"
+    }
+
+    validator(req.body, validateRules, {}, async (err, status) => {
+        if (!status) {
+            return errorResponse({
+                statusCode: 412,
+                errors: err.errors,
+                message: `Validation failed`
+            }, res)
+        } else {
+            const [ user ] = await getUserService({
+                emailId: req.body.emailId,
+                status: ['Active']
+            })
+            
+            if (user) {
+                return errorResponse({
+                    statusCode: 412,
+                    errors: {
+                        emailId: [
+                            `The email id is already exists.`
+                        ]
+                    },
+                    message: `Validation failed`
+                }, res)
+            }
+
+            req.foundUser = user
+            next()
+        }
+    }) 
+}
+
 module.exports =  { 
     validateRegisterUser,
     validateAuthUser,
     validateForgotPassword,
-    validateResetPassword
+    validateResetPassword,
+    validateSendOtpUser
 }
