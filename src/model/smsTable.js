@@ -10,5 +10,6 @@ module.exports = {
     tableSentSmsRecord: 'sent_sms_record',
     tableUserToken: 'user_tokens',
     tableAuthOtp: 'auth_otp',
-    tableGroupMaster: 'group_master'
+    tableGroupMaster: 'group_master',
+    tableCustomerGroupMapping: 'customer_group_mapping'
 }
