@@ -75,7 +75,7 @@ const addCustomer = async(req, res) => {
         const { dbResult, newCreated } = await findOrCreateCustomerService(dbObjArr, groupId)
         return successResponse({
                 user: dbResult,
-                message: newCreated ? `${newCreated} new record(s) added successfully!` : 'All mobile number(s) already exist(s)'
+                message: newCreated ? `${newCreated} new record(s) added successfully!` : 'All mobile number(s) already exists.'
             }, res)
     } catch (err) {
        return  errorResponse({

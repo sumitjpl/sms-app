@@ -13,6 +13,10 @@ const validateRegisterUser = (req, res, next) => {
         "password_confirmation": "required|same:password",
         "company_name": "present",
         "address": "required",
+        "city": "required",
+        "pin_code": "required|digits:6",
+        "state": "required",
+        "country": "required",
         "otp": "required|digits:6"
     }
 

@@ -101,7 +101,11 @@ const createUserObjModel = async options => {
                                     return trx(tableUserProfile).insert({
                                             user_id: insertedId,
                                             company_name,
-                                            address
+                                            address,
+                                            pin_code,
+                                            city,
+                                            state,
+                                            country
                                         })
                                         .then(() => {
                                             return trx(tableUserCred).insert({

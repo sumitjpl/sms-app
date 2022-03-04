@@ -4,8 +4,42 @@ const {
     authenticateUserService, 
     forgotPasswordService, 
     resetPasswordService,
-    sendOtpRegisterUserService
+    sendOtpRegisterUserService,
+    getCountryList,
+    getCitiesOfStateList,
+    getStateOfCountryList
 } = require('./service')
+
+const getCountryStateCityList = async (req, res) => {
+    try {
+        const { params: { countryCode, stateCode } } =  req
+
+        if (countryCode && stateCode) {
+            const cityList = await getCitiesOfStateList({
+                countryCode,
+                stateCode
+            })
+
+            return successResponse({ cityList }, res)
+        }
+
+        if (countryCode) {
+            const stateList = await getStateOfCountryList({
+                countryCode
+            })
+
+            return successResponse({ stateList }, res)
+        }
+
+        const countryList = await getCountryList({
+            countryCode
+        })
+
+        return successResponse({ countryList }, res)
+    } catch (err) {
+        return errorResponse({message: err.message}, res)
+    }
+}
 
 const sendOtpForRegisterUser = async (req, res) => {
     try {
@@ -87,6 +121,7 @@ const resetPassword = async (req, res) => {
 }
 
 module.exports = {
+    getCountryStateCityList,
     registerUser,
     sendOtpForRegisterUser,
     authenticateUser,

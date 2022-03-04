@@ -4,7 +4,8 @@ const {
     sendOtpForRegisterUser,
     authenticateUser, 
     forgotPassword, 
-    resetPassword
+    resetPassword,
+    getCountryStateCityList
 } = require('../../controllers/auth')
 const { 
     validateRegisterUser, 
@@ -16,7 +17,7 @@ const {
 
 module.exports = () => {
     const api = express.Router()
-    
+    api.get('/getCountryStateCityList/:countryCode?/:stateCode?', getCountryStateCityList)
     api.post('/registerUser', validateRegisterUser, registerUser)
     api.post('/sendOtpForRegisterUser', validateSendOtpUser, sendOtpForRegisterUser)
     

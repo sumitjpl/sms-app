@@ -1,12 +1,68 @@
-const bcrypt = require('bcrypt')
-const moment = require('moment') 
+const bcrypt = require("bcrypt")
+const moment = require("moment") 
+const { Country, State, City } =  require("country-state-city")
 
 const { getUserService } = require('../user/service')
-const { getAndDeleteOtp } = require("../../helpers/otp")
+const { getAndDeleteOtp } = require('../../helpers/otp')
 const { generateToken } = require('../../middleware/authApi')
 const { insertUserCredModel, createUserObjModel } = require('../../model/user')
 const { deleteAndInsertTokenService } = require('../../utils/token')
 const { sendOtpService } = require('../../services/sendOtp')
+
+const getCountryList = async ({ countryCode = '' }) => {
+    if (countryCode) {
+        return [ Country.getCountryByCode(countryCode) ] || []
+    }
+
+    return sortCountryList(Country.getAllCountries()) || []
+}
+
+const sortCountryList = (listArr = []) => {
+    let result = []
+    let indiaObj = {}
+    for (const element of listArr) {
+        const { isoCode, name, flag } = element
+        if (isoCode === 'IN') {
+            indiaObj = { ...indiaObj, isoCode, name, flag }
+            continue
+        }
+        result.push({
+            isoCode, name, flag
+        })
+    }
+
+    if (Object.entries(indiaObj).length) {
+        result.unshift(indiaObj)
+    }
+
+    return result
+}
+
+const getStateOfCountryList = async ({
+    countryCode = '', 
+    stateCode = ''
+}) => {
+    if (!countryCode) {
+        throw new Error('country code is required to get the state list!')
+    }
+
+    if (stateCode) {
+        return [ State.getStateByCodeAndCountry(stateCode, countryCode) ] || []
+    }
+
+    return State.getStatesOfCountry(countryCode) || []
+}
+
+const getCitiesOfStateList = async ({
+    countryCode = '', 
+    stateCode = '',
+}) => {
+    if (!countryCode ||!stateCode ) {
+        throw new Error('country code and state code are required to get the city list!')
+    }
+
+    return City.getCitiesOfState(countryCode, stateCode) || []
+}
 
 const registerUserService = async options => {
     try {
@@ -144,5 +200,8 @@ module.exports = {
     authenticateUserService,
     forgotPasswordService,
     resetPasswordService,
-    hashPasswordAsync
+    hashPasswordAsync,
+    getCountryList,
+    getStateOfCountryList,
+    getCitiesOfStateList
 }
