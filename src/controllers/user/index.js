@@ -9,7 +9,7 @@ const { errorResponse, successResponse } = require('../../utils/apiResponse')
 const getUserDetails = async (req, res) => {
     try {
         const { query: { emailId } } = req
-        const [ user ] = await getUserService({emailId})
+        const user = await getUserService({emailId})
         return successResponse({
             user
         }, res)
