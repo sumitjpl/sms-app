@@ -5,7 +5,7 @@ const getGroupMasterModel = async ({
     groupId,
     userId,
     groupName,
-    status = []
+    status = null
 }) => {
     const sql = knex(tableGroupMaster)
                 .select('*')
@@ -22,13 +22,12 @@ const getGroupMasterModel = async ({
         sql.whereRaw(`group_name LIKE '%${groupName}%'`)
     }
 
-    if (status.length) {
-        if (status === 1) {
-            sql.whereNull(`deleted_at`)
-        }
-        if (status === 0) {
-            sql.whereNotNull(`deleted_at`)
-        }
+    if (status === 1) {
+        sql.whereNull(`deleted_at`)
+    }
+    
+    if (status === 0) {
+        sql.whereNotNull(`deleted_at`)
     }
 
     sql.orderBy('id', 'desc')
