@@ -28,7 +28,7 @@ const delSertTokenModel = async ({
     }
 
     return knex.transaction(trx => {
-        return trx(tableUserToken).where('user_id', userId).del()
+        return trx(tableUserToken).where('user_id', userId)
                 .then(result => {
                     return trx(tableUserToken).insert({
                         user_id: userId,
