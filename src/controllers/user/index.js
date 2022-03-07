@@ -1,4 +1,4 @@
-const { getUserService } = require('./service')
+const { getUserService, updateUserService } = require('./service')
 const { 
     groupListService,
     addGroupService,
@@ -78,9 +78,27 @@ const modifyGroup = async (req, res) => {
     }
 }
 
+const updateUser = async (req, res) => {
+    try {
+        const { body } = req
+
+        const user = await updateUserService(body)
+        return successResponse({
+            message: `User updated successfully!`,
+            user
+        }, res)
+    } catch (err) {
+        return errorResponse({
+            statusCode: 500,
+            message: err.message
+        }, res)
+    }
+}
+
 module.exports = {
     getUserDetails,
     groupList,
     addGroup,
-    modifyGroup
+    modifyGroup,
+    updateUser
 }

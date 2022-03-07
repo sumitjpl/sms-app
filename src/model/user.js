@@ -129,8 +129,34 @@ const createUserObjModel = async options => {
     .catch(err => { throw err })
 }
 
+const updateUserModel = async options => {
+    const { id = null } = options
+
+    if (!id) {
+        throw new Error('id required')
+    }
+
+    return knex.transaction(trx => {
+        return trx(tableUser).where(`id`, id)
+                .then(result => {
+                    if (!result.length) {
+                        throw new Error('Record not found!')
+                    }
+                    return trx(tableUser).where('id', id).update(options)
+                            .then(() => {
+                                return getUserModel()
+                            })
+                })
+                .then(trx.commit)
+                .catch(trx.rollback)
+            })
+            .then(resp => resp)
+            .catch(err => { throw err })
+}
+
 module.exports = {
     createUserObjModel,
     getUserModel,
-    insertUserCredModel
+    insertUserCredModel,
+    updateUserModel
 }
