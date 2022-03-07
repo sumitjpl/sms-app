@@ -62,11 +62,9 @@ const getCustomerListModel = async ({
     customerStatus = [],
     customerGroupMappingStatus = [],
 }) => {
-    const sql = knex.select([
-                    'cust.*',
-                    'cust_grp.group_id',
-                    'grp.group_name'
-                ])
+    const sql = knex.select(
+                knex.raw(`cust.*, cust_grp.group_id, grp.group_name, IF(cust.deleted_at is null, 'Active', 'Deleted') as status`)
+                )
                 .from(`${tableClientCustomer} as cust`)
                 .leftJoin(`${tableCustomerGroupMapping} as cust_grp`, function() {
                     this.on('cust_grp.customer_id', 'cust.id')
