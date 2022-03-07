@@ -18,6 +18,28 @@ const getSmsTemplateModel = async({
     return sql
 }
 
+const addSmsTemplateModel = async (insertObj) => {
+    const { operator_template_id } = insertObj
+    return knex.transaction(trx => {
+        return trx(tableSmsTemplate).where(`operator_template_id`, operator_template_id)
+                .then(result => {
+                    if (result.length) {
+                        throw new Error(`Record already exists with the operator template id - ${operator_template_id}`)
+                    }
+
+                    return trx(tableSmsTemplate).insert(insertObj)
+                            .then(() => {
+                                return getSmsTemplateModel({})
+                            })
+                })
+                .then(trx.commit)
+                .catch(trx.rollback)
+            })
+            .then(resp => resp)
+            .catch(err => { throw err })
+}
+
 module.exports = {
-    getSmsTemplateModel
+    getSmsTemplateModel,
+    addSmsTemplateModel
 }

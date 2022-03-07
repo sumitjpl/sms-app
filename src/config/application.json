@@ -7,5 +7,8 @@
     },
     "SMS_DELIVERY_URL" : "/api/sms/smsDeliveryCallBack",
     "OTP_MAX_EXPIRY_DIGIT": 10,
-    "OTP_EXPIRY_TYPE" : "minutes"
+    "OTP_EXPIRY_TYPE" : "minutes",
+    "SMS_TEMPLATE_STATUS": {
+        "APPROVED_BY_OPERATOR": "Approved By Operator"
+    }
 }
