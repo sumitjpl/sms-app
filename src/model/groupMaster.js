@@ -74,7 +74,7 @@ const updateGroupModel = async options => {
                     if (!isUpdated) {
                         throw new Error(`Record could't get updated! please try again.`)
                     }
-                    return trx(tableGroupMaster).where('user_id', user_id).whereNull(`deleted_at`)
+                    return trx(tableGroupMaster).where('user_id', user_id).whereNull(`deleted_at`).select(knex.raw(`*, IF(deleted_at is null, 'Active', 'Deleted') as status`))
                 })
                 .then(trx.commit)
                 .catch(trx.rollback)
