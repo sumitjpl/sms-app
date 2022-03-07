@@ -14,7 +14,7 @@ const generateToken = async (options) => {
 
         return jwt.sign({
             iat: moment().unix(),
-            exp: moment().add(JWT_MAX_EXPIRY_DIGIT, JWT_EXPIRY_TYPE).unix(),
+            expiresIn: `${JWT_MAX_EXPIRY_DIGIT}${JWT_EXPIRY_TYPE}`,
             data: {
                 loggedInUserId: id,
                 emailId: email_id

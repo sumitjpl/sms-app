@@ -1,5 +1,5 @@
 {
-    "JWT_MAX_EXPIRY_DIGIT" : 1,
+    "JWT_MAX_EXPIRY_DIGIT" : "2",
     "JWT_EXPIRY_TYPE" : "d",
     "SMS_API_BASE_URL" : "https://sms.kistonedigital.com",
     "SMS_API_END_POINTS" : {

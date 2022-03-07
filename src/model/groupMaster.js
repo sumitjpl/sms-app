@@ -25,7 +25,7 @@ const getGroupMasterModel = async ({
     if (status === 1) {
         sql.whereNull(`deleted_at`)
     }
-    
+
     if (status === 0) {
         sql.whereNotNull(`deleted_at`)
     }
@@ -67,6 +67,7 @@ const updateGroupModel = async options => {
     if (!id) {
         throw new Error('id required!')
     }
+    
     return knex.transaction(trx => {
         return trx(tableGroupMaster).where('id', id).where('user_id', user_id).update(options)
                 .then(isUpdated => {
