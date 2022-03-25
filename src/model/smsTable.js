@@ -11,5 +11,6 @@ module.exports = {
     tableUserToken: 'user_tokens',
     tableAuthOtp: 'auth_otp',
     tableGroupMaster: 'group_master',
-    tableCustomerGroupMapping: 'customer_group_mapping'
+    tableCustomerGroupMapping: 'customer_group_mapping',
+    tableSentSmsTracking: 'send_sms_tracking'
 }

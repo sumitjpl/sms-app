@@ -52,8 +52,21 @@ const generateOtp = () => {
     return Math.floor(100000 + Math.random() * 900000)
 }
 
+const extractValue = (data = [], key = '') => {
+    const result = []
+    data.map(item => item[key] && result.push(item[key]))
+    
+    return result
+}
+
+const arrayUnique = (list = []) => {
+    return [ ...new Set(list) ]
+}
+
 module.exports = {
     generatePassword,
     isValidMobileNo,
-    generateOtp
+    generateOtp,
+    extractValue,
+    arrayUnique
 }

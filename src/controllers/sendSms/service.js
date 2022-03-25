@@ -1,132 +1,182 @@
-const axios = require('axios')
+const axios = require("axios")
+const uuid = require("uuid")
 const moment = require('moment')
 
-const appConfig = require('../../config/application.json')
 const { getSmsTemplateModel } =  require('../../model/smsTemplate')
-const { insertSentSmsRecord } = require('../../model/sentSmsRecord')
-const { SMS_DELIVERY_STATUS, OPERATOR_STATUS_CODE } = require('../../constants/appConstant')
-const { isValidMobileNo } = require('../../utils/commonFunction')
+const { insertSentSmsRecordModel } = require('../../model/sentSmsRecord')
+const { SMS_DELIVERY_STATUS } = require('../../constants/appConstant')
+const { isValidMobileNo, extractValue } = require('../../utils/commonFunction')
+const { getCustomerListModel } = require('../../model/customer')
 
-const sendSmsService = async (options = {}) => {
+const AIRTEL_SMS_PUSH_END_POINT = process.env.AIRTEL_SMS_PUSH_END_POINT
+const AIRTEL_API_KEYWORD = process.env.AIRTEL_API_KEYWORD
+const AIRTEL_API_CAMPAIGN_NAME = process.env.AIRTEL_API_CAMPAIGN_NAME
+const AIRTEL_API_CIRCLE_NAME = process.env.AIRTEL_API_CIRCLE_NAME
+const AIRTEL_API_USER_NAME = process.env.AIRTEL_API_USER_NAME
+const AIRTEL_API_DLT_TM_ID = process.env.AIRTEL_API_DLT_TM_ID
+const AIRTEL_API_DLT_PE_ID = process.env.AIRTEL_API_DLT_PE_ID
+const AIRTEL_API_CHANNEL = process.env.AIRTEL_API_CHANNEL
+const AIRTEL_API_OA = process.env.AIRTEL_API_OA
+const AIRTEL_SMS_DELIVERY_URL = process.env.AIRTEL_SMS_DELIVERY_URL
+
+const sendSmsService = async ({
+    smsText,
+    templateId = null,
+    mobileNo = [],
+    loggedInUserId = null
+}) => {
     try {
-        let { templateId = '', mobileNo = [], loggedInUserId } = options
-        if (templateId === '' || !mobileNo.length) {
-            throw Error('All the parameters are required to send sms!')
+        if (!templateId) {
+            throw new Error('Select a valid SMS template!')
         }
-
-        const smsTemplate = await getSmsTemplateModel({
-                                operatorTemplateId: templateId
-                            })
+        const smsTemplate = await getSmsTemplateModel({ operatorTemplateId: templateId })
         if (!smsTemplate.length) {
-            throw Error('Invalid template!')
+            throw new Error('Selected template is invalid!')
         }
+        const pushObj =  setPushSmsObj({ templateId, mobileNoList: mobileNo, smsText })
+        console.log(pushObj)
+        //!~ Send push data to the service provider API
+        const response = await sendSmsToEndPoint({ pushObj })
 
-        const [{ template_body, sender_id, operator_template_id }] = smsTemplate
-        let smsText = String(template_body)
-                        .replace('{#var_1#}', 'Test')
-                        .replace('{#var_2#}', 'Test')
-                        .replace('{#var_3#}', 'Test')
-                        .replace('{#var_4#}', 'Test')
+        //!~ Insert records in the sent sms record table
+        setTimeout(async () => {
+            await createSentSmsTrack({ smsText, loggedInUserId, pushObj })
+        }, 0)
 
-        const { status, data } = await sendSmsToEndPoint({
-            mobileNo,
-            operatorTemplateId: operator_template_id,
-            senderId: sender_id,
-            smsText
-        })
-
-        if (status === 200 && data.status === 'success') {
-            await createSentSmsTrack({
-                message: data.message,
-                smsText,
-                loggedInUserId
-            })
-        }
-        
-        return { status, message: data.message,  statusMessage: OPERATOR_STATUS_CODE[status] }
+        return response
     } catch (err) {
         throw err
     }
 }
 
 const sendSmsToEndPoint = async ({
-    mobileNo,
-    operatorTemplateId,
-    senderId,
-    smsText
+    pushObj
 }) => {
-    const recipients = mobileNo.length > 1 ? encodeURI(mobileNo.join(" ")) : mobileNo[0]
-    const endPoint = `${appConfig.SMS_API_BASE_URL}${appConfig.SMS_API_END_POINTS.PUSH_SMS}`
-    const deliverUrl = encodeURI(`${process.env.BASE_URL}${appConfig.SMS_DELIVERY_URL}?status=%d&mobileNo=%p&message=%t&timestamp=%a`)
-    const params = `?accesskey=${process.env.SMS_ACCESS_KEY}&to=${recipients}&text=${smsText}&from=${senderId}&tid=${operatorTemplateId}&dlrurl=${deliverUrl}`
-    const response = await axios.get(`${endPoint}${params}`, {validateStatus: () => true})
+    const pushApiUrl = AIRTEL_SMS_PUSH_END_POINT
+    const response = await axios(pushApiUrl, pushObj)
     
     return response
 }
 
-const createSentSmsTrack = async (options) => {
-    const { message = [], smsText = '', loggedInUserId } = options
-    if (!message.length) {
-        throw Error(`Response object doesn't have message!`)
-    }
-
-    if (smsText === '') {
-        throw Error(`Sms content is empty!`)
-    }
-
-    if (!loggedInUserId) {
-        throw Error(`Logged in user not found!`)
-    }
-
+const createSentSmsTrack = async ({
+    smsText = '', 
+    loggedInUserId = null, 
+    pushObj = {}
+}) => {
+    const { timestamp = null, dataSet = [] } = pushObj
     try {
+        let sentSmsDbRecord = []
         const smsContentId = moment().unix()
-        const res =  await insertSentSmsRecord({
-            smsContentObj: { id: smsContentId,  sms_content: smsText },
-            smsRecordObj: setSentSmsObj(message, loggedInUserId, smsContentId),
-            loggedInUserId
+        dataSet.forEach(el => {
+            sentSmsDbRecord.push({
+                unique_id: el.UNIQUE_ID,
+                user_id: loggedInUserId,
+                recipient_no: el.MSISDN,
+                sms_content_id: smsContentId,
+                sent_at: timestamp,
+                status: SMS_DELIVERY_STATUS.SENT,
+                operator_txn_id: null
+            })
         })
 
-        return res
+        if (sentSmsDbRecord.length) {
+            await insertSentSmsRecordModel({
+                smsContentObj: { id: smsContentId,  sms_content: smsText },
+                smsRecordObj: sentSmsDbRecord,
+                loggedInUserId
+            })
+        }
+        return true
     } catch (err) {
         throw err
     }
 }
 
-const setSentSmsObj = (message = [], loggedInUserId, smsContentId) => {
-    let timestamp = moment().format("YYYYMMDDHHmmss")
-    let result = []
-    message.forEach(el => {
-        let key = [Object.keys(el)]
-        result.push({
-            unique_id: `${timestamp}${el[key]}`,
-            user_id: loggedInUserId,
-            recipient_no: key,
-            sms_content_id: smsContentId,
-            sent_at: timestamp,
-            status: SMS_DELIVERY_STATUS.SENT,
-            operator_txn_id: el[key]
-        })
+const setPushSmsObj = ({
+    templateId = null,
+    mobileNoList = [], 
+    smsText = ''
+}) => {
+    const timestamp = moment().format("YYYYMMDDHHmmss")
+    let pushObj = {
+        keyword: AIRTEL_API_KEYWORD,
+        timestamp,
+        dataSet: []
+    }
+    mobileNoList.forEach(mobileNo => {
+        pushObj.dataSet.push({
+            ...setPushDataset({
+                uniqueId: uuid.v4() ,
+                message: smsText,
+                mobileNo,
+                templateId
+        })})
     })
+   
 
-    return result
+    return  pushObj
+}
+
+const setPushDataset = ({
+    uniqueId,
+    message,
+    mobileNo,
+    templateId
+}) => {
+    return {
+        UNIQUE_ID: uniqueId,
+        MESSAGE: message,
+        OA: AIRTEL_API_OA,
+        MSISDN: mobileNo,
+        CHANNEL: AIRTEL_API_CHANNEL,
+        CAMPAIGN_NAME: AIRTEL_API_CAMPAIGN_NAME,
+        CIRCLE_NAME: AIRTEL_API_CIRCLE_NAME,
+        USER_NAME: AIRTEL_API_USER_NAME,
+        DLT_TM_ID: AIRTEL_API_DLT_TM_ID,
+        DLT_CT_ID: templateId,
+        DLT_PE_ID: AIRTEL_API_DLT_PE_ID,
+        ACTION_RESP_URL: AIRTEL_SMS_DELIVERY_URL
+    }
 }
 
 const validateMobileNo = (mobileNoList = []) => {
     errorList = []
+    mobileList = []
     for (let index = 0; index < mobileNoList.length; index++) {
         const mobileNo = mobileNoList[index];
         let { isValid, message } = isValidMobileNo(mobileNo)
         if (!isValid) {
             errorList.push(`${mobileNo}: ${message}`)
+        } else {
+            mobileList.push(String(mobileNo))
         }
     }
 
-    return errorList
+    return  { errorList, mobileList }
+}
+
+const getCustomerByGroupId = async ({
+    groupId, 
+    customerStatus = [],
+    customerGroupMappingStatus = []
+}) => {
+    try {
+        if (!groupId) {
+            throw new Error('groupId is required!')
+        }
+        const result = await getCustomerListModel({ groupId, customerStatus, customerGroupMappingStatus })
+
+        return result
+    } catch (err) {
+        throw err
+    }
 }
 
 module.exports = {
     sendSmsService,
     createSentSmsTrack,
     validateMobileNo,
-    sendSmsToEndPoint
+    sendSmsToEndPoint,
+    setPushDataset,
+    getCustomerByGroupId
 }

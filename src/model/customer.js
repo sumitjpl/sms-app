@@ -49,9 +49,9 @@ const addCustomerGroupMappingModel = async options => {
                 })
                 .then(trx.commit)
                 .catch(trx.rollback)
+            })
             .then(resp => resp)
             .catch(err => { throw err })
-    })
 }
 
 const getCustomerListModel = async ({
