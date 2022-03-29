@@ -1,14 +1,18 @@
 
-const express = require('express')
+const express = require("express")
 const app = express()
-const cors = require('cors')
-const morgan = require('morgan')
-const bodyParser = require('body-parser')
+const cors = require("cors")
+const morgan = require("morgan")
+const bodyParser = require("body-parser")
+const fs = require("fs")
+const path = require("path")
+
 const apiResponse = require('./src/utils/apiResponse')
 const routes = require('./src/routes/index')
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
 
 app.use(cors())
-app.use(morgan('combined'))
+app.use(morgan('combined', { stream: accessLogStream }))
 app.use(
   bodyParser.urlencoded({
     limit: '100mb',

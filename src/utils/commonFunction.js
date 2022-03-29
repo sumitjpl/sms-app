@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt')
+const bcrypt = require("bcrypt")
 
 const generatePassword = async(options = {}) => {
     const { saltLen = 10 } = options

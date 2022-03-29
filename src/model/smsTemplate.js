@@ -6,9 +6,12 @@ const getSmsTemplateModel = async({
     createdUserId
 }) => {
     const sql = knex(tableSmsTemplate).select()
-
-    if (operatorTemplateId) {
-        sql.where('operator_template_id', operatorTemplateId)
+    if (operatorTemplateId !== undefined) {
+        if (Array.isArray(operatorTemplateId)) {
+            sql.whereIn('operator_template_id', operatorTemplateId)
+        } else {
+            sql.where('operator_template_id', operatorTemplateId)
+        }
     }
 
     if (createdUserId) {
@@ -39,7 +42,16 @@ const addSmsTemplateModel = async (insertObj) => {
             .catch(err => { throw err })
 }
 
+const addSmsTemplateBulkModel = async (insertObjList = []) => {
+    if (!insertObjList.length) {
+        throw new Error(`Empty sms template insert list!`)
+    }
+    const sql = knex(tableSmsTemplate).insert(insertObjList)
+    return sql
+}
+
 module.exports = {
     getSmsTemplateModel,
-    addSmsTemplateModel
+    addSmsTemplateModel,
+    addSmsTemplateBulkModel
 }

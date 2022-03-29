@@ -30,3 +30,5 @@ node_modules/
 local.json
 
 dist/
+
+resources/
