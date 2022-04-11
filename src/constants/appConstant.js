@@ -19,5 +19,6 @@ module.exports = {
             mimeTypes:["application/vnd.ms-excel"]
         }
     },
-    ADD_TEMPLATE_EXCEL_HEADERS: ["Template_Id", "Template_Name", "Template_Body", "Sender_Id"]
+    ADD_TEMPLATE_EXCEL_HEADERS: ["Template_Id", "Template_Name", "Template_Body", "Sender_Id"],
+    ADD_CUSTOMER_EXCEL_HEADERS:["groupName", "mobileNumber", "customerName"]
 }

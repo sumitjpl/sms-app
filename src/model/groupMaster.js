@@ -10,16 +10,28 @@ const getGroupMasterModel = async ({
     const sql = knex(tableGroupMaster)
                 .select(knex.raw(`*, IF(deleted_at is null, 'Active', 'Deleted') as status`))
     
-    if (groupId) {
-        sql.where('id', groupId)
+    if (groupId !== undefined) {
+        if (Array.isArray(groupId)) {
+            sql.whereIn('id', groupId)
+        } else {
+            sql.where('id', groupId)
+        }
     }
 
-    if (userId) {
-        sql.where('user_id', userId)
+    if (groupId !== undefined) {
+        if (Array.isArray(groupId)) {
+            sql.whereIn('user_id', groupId)
+        } else {
+            sql.where('user_id', groupId)
+        }
     }
 
-    if (groupName) {
-        sql.whereRaw(`group_name LIKE '%${groupName}%'`)
+    if (groupName !== undefined) {
+        if (Array.isArray(groupName)) {
+            sql.whereIn('group_name', groupName)
+        } else {
+            sql.whereRaw(`group_name LIKE '%${groupName}%'`)
+        }
     }
 
     if (status === 1) {
@@ -31,7 +43,7 @@ const getGroupMasterModel = async ({
     }
 
     sql.orderBy('id', 'desc')
-
+    
     return sql
 }
 

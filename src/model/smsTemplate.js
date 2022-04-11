@@ -29,11 +29,7 @@ const addSmsTemplateModel = async (insertObj) => {
                     if (result.length) {
                         throw new Error(`Record already exists with the operator template id - ${operator_template_id}`)
                     }
-
                     return trx(tableSmsTemplate).insert(insertObj)
-                            .then(() => {
-                                return getSmsTemplateModel({})
-                            })
                 })
                 .then(trx.commit)
                 .catch(trx.rollback)

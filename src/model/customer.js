@@ -73,22 +73,36 @@ const getCustomerListModel = async ({
                     this.on('grp.id', 'cust_grp.group_id')
                 })
     
-    if (customerId) {
-        sql.where('cust.id', customerId)
+    if (customerId !== undefined) {
+        if (Array.isArray(customerId)) {
+            sql.whereIn('cust.id', customerId)
+        } else {
+            sql.where('cust.id', customerId)
+        }
     }
 
-    if (userId) {
-        sql.where('cust.created_user_id', userId)
+    if (userId !== undefined) {
+        if (Array.isArray(userId)) {
+            sql.whereIn('cust.created_user_id', userId)
+        } else {
+            sql.where('cust.created_user_id', userId)
+        }
     }
 
-    if (groupId) {
-        sql.where('cust_grp.group_id', groupId)
+    if (groupId !== undefined) {
+        if (Array.isArray(groupId)) {
+            sql.whereIn('cust_grp.group_id', groupId)
+        } else {
+            sql.where('cust_grp.group_id', groupId)
+        }
     }
 
-    if (Array.isArray(mobileNo) && mobileNo.length) {
-        sql.whereIn('cust.mobileNo', mobileNo)
-    } else if (mobileNo) {
-        sql.where('cust.mobileNo', mobileNo)
+    if (mobileNo !== undefined) {
+        if (Array.isArray(mobileNo) && mobileNo.length) {
+            sql.whereIn('cust.mobile_no', mobileNo)
+        } else if (mobileNo) {
+            sql.where('cust.mobile_no', mobileNo)
+        }
     }
 
     if (Array.isArray(customerStatus) && customerStatus.length) {
@@ -108,12 +122,24 @@ const getCustomerListModel = async ({
             sql.whereNotNull('cust_grp.deleted_at')
         }
     }
-
+    
     return sql
+}
+
+const addCustomerBulkModel = async(insertObj) => {
+    return knex.transaction(trx => {
+        return trx(tableClientCustomer).insert(insertObj)
+                .then(result => console.log(result))
+                .then(trx.commit)
+                .catch(trx.rollback)
+    })
+    .then(resp => resp)
+    .catch(err =>  { throw err })
 }
 
 module.exports = {
     getCustomerListModel,
     findOrCreateCustomerModel,
-    addCustomerGroupMappingModel
+    addCustomerGroupMappingModel,
+    addCustomerBulkModel
 }

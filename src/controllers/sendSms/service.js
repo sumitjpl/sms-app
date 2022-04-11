@@ -34,7 +34,7 @@ const sendSmsService = async ({
             throw new Error('Selected template is invalid!')
         }
         const pushObj =  setPushSmsObj({ templateId, mobileNoList: mobileNo, smsText })
-        console.log(pushObj)
+       
         //!~ Send push data to the service provider API
         const response = await sendSmsToEndPoint({ pushObj })
 
@@ -49,13 +49,22 @@ const sendSmsService = async ({
     }
 }
 
-const sendSmsToEndPoint = async ({
+const sendSmsToEndPoint = ({
     pushObj
 }) => {
     const pushApiUrl = AIRTEL_SMS_PUSH_END_POINT
-    const response = await axios(pushApiUrl, pushObj)
-    
-    return response
+
+    console.log('End Point - ', pushApiUrl, pushObj)
+
+    return axios.post(pushApiUrl, pushObj)
+            .then(function (response) {
+                console.log('response', response)
+                return response
+            })
+            .catch(function (error) {
+                console.log(error)
+                throw error
+            })
 }
 
 const createSentSmsTrack = async ({

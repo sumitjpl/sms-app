@@ -34,27 +34,12 @@ const upload = multer({
     onError: function(err, next) {
         next(err)
     }
-}).fields([
-    { name: "addTemplateExcelFile", maxCount: 1 }
-])
+}).single('addTemplateExcelFile')
 
 const uploadExcelFile = (req, res, next) => {
     upload(req, res, function(err) {
-        if (req.files !== undefined) {
-            const { addTemplateExcelFile = [] } = req.files
-            const [{ path: filePath = null, size = 0 }] = addTemplateExcelFile
-            
-            if (!addTemplateExcelFile.length) {
-                if (filePath) {
-                    fs.unlinkSync(filePath)
-                }
-
-                return errorResponse({
-                    statusCode: 500,
-                    message: `There is some error in the uploaded file!`
-                }, res)
-            }
-            
+        if (req.file !== undefined) {
+            const { path: filePath = null, size = 0 } = req.file
             if (size > UPLOAD_FILE_CONFIG.EXCEL.maxExcelFileSize) {
                 if (filePath) {
                     fs.unlinkSync(filePath)

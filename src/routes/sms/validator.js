@@ -6,8 +6,7 @@ const validateSmsTemplateData = (req, res, next) => {
         "operator_template_id": "required",
         "template_name": "required",
         "template_body": "required",
-        "sender_id": "required",
-        "status": "required"
+        "sender_id": "required"
     }
 
     validator(req.body, validateRules, {}, async (err, status) => {

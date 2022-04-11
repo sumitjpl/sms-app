@@ -53,9 +53,8 @@ const generateOtp = () => {
 }
 
 const extractValue = (data = [], key = '') => {
-    const result = []
-    data.map(item => item[key] && result.push(item[key]))
-    
+    let result = []
+    data.forEach(item => item[key] && result.push(item[key]))
     return result
 }
 
@@ -63,10 +62,28 @@ const arrayUnique = (list = []) => {
     return [ ...new Set(list) ]
 }
 
+const setKeyValueHash = ({
+    list = [], 
+    keyIndex = '', 
+    valueIndex =  ''
+}) => {
+    let result = {}
+    if (list.length && keyIndex && valueIndex) {
+        list.forEach(obj => {
+            if (obj[valueIndex]) {
+                result = {...result, [obj[keyIndex]]:obj[valueIndex]}
+            }
+        })
+    }
+
+    return result
+}
+
 module.exports = {
     generatePassword,
     isValidMobileNo,
     generateOtp,
     extractValue,
-    arrayUnique
+    arrayUnique,
+    setKeyValueHash
 }

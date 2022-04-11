@@ -14,8 +14,8 @@ const addSmsTemplate = async (req, res) => {
         let { body } = req
         body.created_user_id = loggedInUserId
 
-        const templateList = await addSmsTemplateService(body)
-        
+        await addSmsTemplateService(body)
+        const templateList = await getSmsTemplateService({ createdUserId: loggedInUserId })
         return successResponse({
             message: `Sms template added successfully!`,
             templateList
@@ -77,8 +77,8 @@ const getTemplateSampleFile = (req, res) => {
 const addSmsTemplateBulk = async (req, res) => {
     try {
         const { authData: { loggedInUserId } } = req
-        if (req.files !== undefined) {
-            const { addTemplateExcelFile: [{ path: filePath }] } = req.files
+        if (req.file !== undefined) {
+            const {  path: filePath } = req.file
             const result =  await addSmsTemplateBulkService({
                                 filePath,
                                 loggedInUserId
@@ -91,6 +91,9 @@ const addSmsTemplateBulk = async (req, res) => {
                 templateList
             }, res)
         }
+        return errorResponse({
+            message: `There is some error in the file.`
+        }, res)
     } catch (err) {
         return errorResponse({
             statusCode: 500,

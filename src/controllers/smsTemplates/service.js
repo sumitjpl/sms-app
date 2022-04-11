@@ -16,7 +16,6 @@ const addSmsTemplateService = async (options) => {
         if (!created_user_id) {
             throw new Error('Logged in user not found!')
         }
-
         const dbResult = await addSmsTemplateModel({
             ...setSmsTemplateObj(options)
         })
