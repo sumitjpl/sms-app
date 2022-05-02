@@ -36,16 +36,17 @@ const sendSmsService = async ({
         const pushObj =  setPushSmsObj({ templateId, mobileNoList: mobileNo, smsText })
        
         //!~ Send push data to the service provider API
-        const { status, statusText } = await sendSmsToEndPoint({ pushObj })
-        console.log(`response`, response)
+        const response = await sendSmsToEndPoint({ pushObj })
         //!~ Insert records in the sent sms record table
-        if (status === 200) {
+        if (response.status === 200) {
             setTimeout(async () => {
                 await createSentSmsTrack({ smsText, loggedInUserId, pushObj })
             }, 0)
         } else {
-            throw new Error(statusText)
+            throw new Error(response.statusText)
         }
+        
+        return response
     } catch (err) {
         throw err
     }
