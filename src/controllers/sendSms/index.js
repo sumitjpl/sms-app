@@ -48,13 +48,13 @@ const sendSMSController = async (req, res) => {
             }
         }
        
-        const result = await sendSmsService({
+        const {status, statusText} = await sendSmsService({
                             mobileNo: arrayUnique(mobileNo),
                             smsText,
                             templateId,
                             loggedInUserId
                         })
-        return successResponse({ data: result }, res)
+        return successResponse({ status, statusText }, res)
     } catch (err) {
         return errorResponse({ message: err.message }, res)
     }
