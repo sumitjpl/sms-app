@@ -49,7 +49,7 @@ const sendSmsService = async ({
     }
 }
 
-const sendSmsToEndPoint = ({
+const sendSmsToEndPoint = async ({
     pushObj
 }) => {
     const pushApiUrl = AIRTEL_SMS_PUSH_END_POINT
