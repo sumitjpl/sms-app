@@ -113,7 +113,8 @@ const setPushSmsObj = ({
                 uniqueId: uuid.v4() ,
                 message: smsText,
                 mobileNo,
-                templateId
+                templateId, 
+                senderId: smsTemplate[0].sender_id
         })})
     })
    
@@ -125,12 +126,13 @@ const setPushDataset = ({
     uniqueId,
     message,
     mobileNo,
-    templateId
+    templateId,
+    senderId
 }) => {
     return {
         UNIQUE_ID: uniqueId,
         MESSAGE: message,
-        OA: smsTemplate[0].sender_id,
+        OA: senderId,
         MSISDN: mobileNo,
         CHANNEL: AIRTEL_API_CHANNEL,
         CAMPAIGN_NAME: AIRTEL_API_CAMPAIGN_NAME,
