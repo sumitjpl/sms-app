@@ -65,7 +65,7 @@ const createSentSmsTrack = async ({
     loggedInUserId = null, 
     pushObj = {}
 }) => {
-    const { timestamp = null, dataSet = [] } = pushObj
+    const { timestamp = null, dataSet = [], keyword } = pushObj
     try {
         let sentSmsDbRecord = []
         const smsContentId = moment().unix()
@@ -78,7 +78,7 @@ const createSentSmsTrack = async ({
                 sent_at: timestamp,
                 status: SMS_DELIVERY_STATUS.SENT,
                 operator_txn_id: null,
-                pushed_obj: JSON.stringify(el)
+                pushed_obj: JSON.stringify({timestamp, keyword, ...el})
             })
         })
 
