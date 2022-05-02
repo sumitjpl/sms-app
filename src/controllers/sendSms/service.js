@@ -37,7 +37,7 @@ const sendSmsService = async ({
        
         //!~ Send push data to the service provider API
         const response = await sendSmsToEndPoint({ pushObj })
-
+        console.log(`response`, response)
         //!~ Insert records in the sent sms record table
         setTimeout(async () => {
             await createSentSmsTrack({ smsText, loggedInUserId, pushObj })
@@ -53,18 +53,8 @@ const sendSmsToEndPoint = ({
     pushObj
 }) => {
     const pushApiUrl = AIRTEL_SMS_PUSH_END_POINT
-
-    console.log('End Point - ', pushApiUrl, pushObj)
-
-    return axios.post(pushApiUrl, pushObj)
-            .then(function (response) {
-                console.log('response', response)
-                return response
-            })
-            .catch(function (error) {
-                console.log(error)
-                throw error
-            })
+    const response = await axios.post(pushApiUrl, pushObj)
+    return response
 }
 
 const createSentSmsTrack = async ({
