@@ -33,7 +33,7 @@ const sendSmsService = async ({
         if (!smsTemplate.length) {
             throw new Error('Selected template is invalid!')
         }
-        const pushObj =  setPushSmsObj({ templateId, mobileNoList: mobileNo, smsText })
+        const pushObj =  setPushSmsObj({ templateId, mobileNoList: mobileNo, smsText, smsTemplate})
        
         //!~ Send push data to the service provider API
         const response = await sendSmsToEndPoint({ pushObj })
@@ -45,7 +45,7 @@ const sendSmsService = async ({
         } else {
             throw new Error(response.statusText)
         }
-        
+
         return response
     } catch (err) {
         throw err
@@ -77,7 +77,8 @@ const createSentSmsTrack = async ({
                 sms_content_id: smsContentId,
                 sent_at: timestamp,
                 status: SMS_DELIVERY_STATUS.SENT,
-                operator_txn_id: null
+                operator_txn_id: null,
+                pushed_obj: JSON.stringify(el)
             })
         })
 
@@ -97,7 +98,8 @@ const createSentSmsTrack = async ({
 const setPushSmsObj = ({
     templateId = null,
     mobileNoList = [], 
-    smsText = ''
+    smsText = '',
+    smsTemplate
 }) => {
     const timestamp = moment().format("YYYYMMDDHHmmss")
     let pushObj = {
@@ -128,7 +130,7 @@ const setPushDataset = ({
     return {
         UNIQUE_ID: uniqueId,
         MESSAGE: message,
-        OA: AIRTEL_API_OA,
+        OA: smsTemplate[0].sender_id,
         MSISDN: mobileNo,
         CHANNEL: AIRTEL_API_CHANNEL,
         CAMPAIGN_NAME: AIRTEL_API_CAMPAIGN_NAME,
